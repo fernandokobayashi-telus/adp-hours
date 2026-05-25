@@ -30,9 +30,10 @@ Computed state returned by the calculator:
 ```js
 {
   workedMs: number,            // total worked time so far today
+  punchCount: number,          // count of today's punches (0..n)
   isOverTarget: boolean,       // workedMs >= TARGET_MS
   suggestions: {
-    returnAt?: Date,           // when to come back from lunch (only when count===2 and under target)
+    returnAt?: Date,           // when to come back from lunch (only when punchCount===2 and under target)
     punchOutAt?: Date          // when to punch out to hit 8h (only when under target and day isn't done)
   }
 }
@@ -112,14 +113,22 @@ Pure function `computeState(rows, now) → state` implementing the table above.
 
 A self-contained pill rendered with a single scoped `<style>` block injected once. All class names prefixed with `adp-hours-` to avoid colliding with site CSS. Layout:
 
-- Line 1 (bold): `Trabalhado hoje: <H>h <M>m`
-- Line 2 (conditional):
-  - Open shift (`n` is 1, 3, 5+) under target: `Saia às HH:MM para 8h`
-  - On lunch (`n === 2`) under target: `Volte às HH:MM · Saia às HH:MM para 8h`
-  - At/over target: `✓ extras: <H>h <M>m` (or `· no ponto`)
-  - Even count ≥ 4 under target (left early scenario): `Faltam <H>h <M>m`
+- Line 1 (bold): `Trabalhado hoje: <duration>`
+- Line 2 (conditional, selected from state — see mapping below)
 
-Times use 24-hour `HH:MM`. Durations use compact `h`/`m` formatting; minutes only when total is under one hour.
+The Line 2 mapping is driven purely by fields on the state object so the banner and popup share one render function:
+
+| Condition | Line 2 |
+|---|---|
+| `punchCount === 0` | `Sem batidas hoje` |
+| `suggestions.returnAt` present | `Volte às HH:MM · Saia às HH:MM para 8h` (uses both `returnAt` and `punchOutAt`) |
+| `suggestions.punchOutAt` present (no `returnAt`) | `Saia às HH:MM para 8h` |
+| `isOverTarget` | `✓ extras: <duration>` where duration = `workedMs − TARGET_MS` |
+| else (left-early case: even punchCount ≥ 4, under target) | `Faltam <duration>` where duration = `TARGET_MS − workedMs` |
+
+Formatting rules:
+- Times: 24-hour `HH:MM`.
+- Durations: `<H>h <M>m` when `H > 0` (e.g. `8h 31m`, `1h 0m` → render as `1h`), `<M>m` when `H === 0` and `M > 0`, `0m` when zero. Trailing ` 0m` is dropped.
 
 ### `popup.html` / `popup.js`
 
