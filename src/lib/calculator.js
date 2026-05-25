@@ -1,14 +1,10 @@
+import { formatDateBR } from './formatter.js';
+
 export const TARGET_MS = 8 * 60 * 60 * 1000;
 export const LUNCH_MS = 60 * 60 * 1000;
 
-function pad2(n) { return String(n).padStart(2, '0'); }
-
-function todayStr(now) {
-  return `${pad2(now.getDate())}/${pad2(now.getMonth() + 1)}/${now.getFullYear()}`;
-}
-
 export function computeState(rows, now) {
-  const today = todayStr(now);
+  const today = formatDateBR(now);
   const todays = rows
     .filter((r) => r.dateStr === today)
     .map((r) => r.time.getTime())
