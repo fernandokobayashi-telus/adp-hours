@@ -397,7 +397,8 @@ test('2 punches (on lunch) → returnAt = p2 + 1h, punchOutAt = returnAt + (8h �
   assert.equal(state.workedMs, morning);
   assert.equal(state.punchCount, 2);
   assert.deepEqual(state.suggestions.returnAt, d(TODAY, 13, 42));
-  assert.deepEqual(state.suggestions.punchOutAt, d(TODAY, 18, 38));
+  // returnAt 13:42 + (8h − 4h46m) = 13:42 + 3h14m = 16:56
+  assert.deepEqual(state.suggestions.punchOutAt, d(TODAY, 16, 56));
 });
 
 test('3 punches (afternoon open) → punchOutAt = p3 + (8h − morning)', () => {
@@ -680,14 +681,14 @@ test('renders lunch state with return + punch-out', () => {
       isOverTarget: false,
       suggestions: {
         returnAt: new Date(2026, 4, 25, 13, 42),
-        punchOutAt: new Date(2026, 4, 25, 18, 38),
+        punchOutAt: new Date(2026, 4, 25, 16, 56),
       },
     },
     doc,
   );
   assert.equal(
     el.querySelector('.adp-hours-line2').textContent,
-    'Volte às 13:42 · Saia às 18:38 para 8h',
+    'Volte às 13:42 · Saia às 16:56 para 8h',
   );
 });
 
