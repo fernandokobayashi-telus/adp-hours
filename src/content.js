@@ -56,10 +56,16 @@ const CSS = `
     }
   }
 
+  let knownTable = null;
   const observer = new MutationObserver(() => {
-    if (document.querySelector(TABLE_SELECTOR)) update();
+    const table = document.querySelector(TABLE_SELECTOR);
+    if (table && table !== knownTable) {
+      knownTable = table;
+      update();
+    }
   });
   observer.observe(document.body, { childList: true, subtree: true });
+  knownTable = document.querySelector(TABLE_SELECTOR);
   update();
 
   setInterval(update, 60_000);

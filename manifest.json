@@ -16,7 +16,7 @@
   "web_accessible_resources": [
     {
       "resources": ["src/lib/*.js"],
-      "matches": ["https://expert.cloud.brasil.adp.com/*"]
+      "matches": ["https://expert.cloud.brasil.adp.com/expert/v5/*"]
     }
   ],
   "action": {
