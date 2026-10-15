@@ -13,7 +13,7 @@ export function computeState(rows, now) {
   const nowMs = now.getTime();
 
   if (n === 0) {
-    return { workedMs: 0, punchCount: 0, isOverTarget: false, suggestions: {} };
+    return { workedMs: 0, punchCount: 0, isOverTarget: false, suggestions: {}, next: null };
   }
 
   let completedMs = 0;
@@ -27,17 +27,20 @@ export function computeState(rows, now) {
   const isOverTarget = workedMs >= TARGET_MS;
 
   const suggestions = {};
+  let next = null;
 
-  if (!isOverTarget) {
-    if (isOpen) {
-      const remaining = TARGET_MS - completedMs;
-      suggestions.punchOutAt = new Date(todays[n - 1] + remaining);
-    } else if (n === 2) {
-      const returnMs = todays[1] + LUNCH_MS;
-      suggestions.returnAt = new Date(returnMs);
-      suggestions.punchOutAt = new Date(returnMs + (TARGET_MS - completedMs));
-    }
+  if (isOpen) {
+    const lunchMs = n === 1 ? LUNCH_MS : 0;
+    const remaining = Math.max(0, TARGET_MS - completedMs) + lunchMs;
+    const punchOutAt = new Date(todays[n - 1] + remaining);
+    next = { kind: 'out', at: punchOutAt };
+    if (!isOverTarget) suggestions.punchOutAt = punchOutAt;
+  } else if (n === 2 && !isOverTarget) {
+    const returnMs = todays[1] + LUNCH_MS;
+    suggestions.returnAt = new Date(returnMs);
+    suggestions.punchOutAt = new Date(returnMs + (TARGET_MS - completedMs));
+    next = { kind: 'return', at: suggestions.returnAt };
   }
 
-  return { workedMs, punchCount: n, isOverTarget, suggestions };
+  return { workedMs, punchCount: n, isOverTarget, suggestions, next };
 }

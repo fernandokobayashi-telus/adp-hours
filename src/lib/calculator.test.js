@@ -20,13 +20,13 @@ test('0 punches today → zero state', () => {
   assert.deepEqual(state.suggestions, {});
 });
 
-test('1 punch → open shift, workedMs = now − p1, punchOutAt = p1 + 8h', () => {
+test('1 punch → open shift, workedMs = now − p1, punchOutAt = p1 + 8h + 1h lunch', () => {
   const state = computeState([row(TODAY, 9, 0)], NOW(11, 30));
   assert.equal(state.workedMs, 2.5 * 60 * 60 * 1000);
   assert.equal(state.punchCount, 1);
   assert.equal(state.isOverTarget, false);
   assert.deepEqual(state.suggestions.returnAt, undefined);
-  assert.deepEqual(state.suggestions.punchOutAt, d(TODAY, 17, 0));
+  assert.deepEqual(state.suggestions.punchOutAt, d(TODAY, 18, 0));
 });
 
 test('2 punches (on lunch) → returnAt = p2 + 1h, punchOutAt = returnAt + (8h − morning)', () => {
@@ -117,4 +117,48 @@ test('5+ punches, second open shift → punchOutAt = pn + (8h − completed)', (
 test('TARGET_MS and LUNCH_MS are exported as expected', () => {
   assert.equal(TARGET_MS, 8 * 3_600_000);
   assert.equal(LUNCH_MS, 3_600_000);
+});
+
+test('next: 0 punches → null', () => {
+  assert.equal(computeState([], NOW(10, 0)).next, null);
+});
+
+test('next: 1 punch → out at p1 + 8h + 1h lunch', () => {
+  const { next } = computeState([row(TODAY, 9, 0)], NOW(11, 0));
+  assert.deepEqual(next, { kind: 'out', at: d(TODAY, 18, 0) });
+});
+
+test('next: 2 punches (on lunch) → return at p2 + 1h', () => {
+  const { next } = computeState([row(TODAY, 9, 0), row(TODAY, 12, 30)], NOW(12, 40));
+  assert.deepEqual(next, { kind: 'return', at: d(TODAY, 13, 30) });
+});
+
+test('next: 3 punches → out at p3 + (8h − morning)', () => {
+  const { next } = computeState(
+    [row(TODAY, 9, 0), row(TODAY, 12, 0), row(TODAY, 13, 0)],
+    NOW(14, 0),
+  );
+  assert.deepEqual(next, { kind: 'out', at: d(TODAY, 18, 0) });
+});
+
+test('next: open shift past its target stays set, in the past (late)', () => {
+  const { next, isOverTarget } = computeState(
+    [row(TODAY, 7, 0), row(TODAY, 12, 0), row(TODAY, 13, 0)],
+    NOW(18, 30),
+  );
+  assert.equal(isOverTarget, true);
+  assert.deepEqual(next, { kind: 'out', at: d(TODAY, 16, 0) });
+});
+
+test('next: 2 punches with morning already ≥ 8h → null', () => {
+  const { next } = computeState([row(TODAY, 6, 0), row(TODAY, 14, 30)], NOW(14, 40));
+  assert.equal(next, null);
+});
+
+test('next: 4 punches (day closed) → null', () => {
+  const { next } = computeState(
+    [row(TODAY, 9, 0), row(TODAY, 12, 0), row(TODAY, 13, 0), row(TODAY, 18, 0)],
+    NOW(18, 5),
+  );
+  assert.equal(next, null);
 });
