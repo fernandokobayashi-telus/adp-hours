@@ -37,6 +37,12 @@ const CSS = `
   }
 
   function update() {
+    // After the extension is reloaded, this orphaned script keeps running but
+    // every chrome.runtime call throws "Extension context invalidated".
+    if (!chrome.runtime?.id) {
+      shutdown();
+      return;
+    }
     const table = document.querySelector(TABLE_SELECTOR);
     if (!table) return;
     injectStyleOnce();
@@ -45,9 +51,14 @@ const CSS = `
     const state = calculator.computeState(rows, new Date());
     lastState = state;
 
-    chrome.runtime
-      .sendMessage({ type: 'TARGET_UPDATE', atMs: state.next ? state.next.at.getTime() : null })
-      .catch(() => {});
+    try {
+      chrome.runtime
+        .sendMessage({ type: 'TARGET_UPDATE', atMs: state.next ? state.next.at.getTime() : null })
+        .catch(() => {});
+    } catch {
+      shutdown();
+      return;
+    }
 
     if (rows.length === 0) {
       console.warn('[adp-hours] punch table found but no rows parsed');
@@ -71,13 +82,20 @@ const CSS = `
   observer.observe(document.body, { childList: true, subtree: true });
   knownTable = document.querySelector(TABLE_SELECTOR);
 
-  update();
+  const timer = setInterval(update, 60_000);
 
-  setInterval(update, 60_000);
-
-  document.addEventListener('visibilitychange', () => {
+  function onVisible() {
     if (document.visibilityState === 'visible') update();
-  });
+  }
+  document.addEventListener('visibilitychange', onVisible);
+
+  function shutdown() {
+    observer.disconnect();
+    clearInterval(timer);
+    document.removeEventListener('visibilitychange', onVisible);
+  }
+
+  update();
 
   chrome.runtime.onMessage.addListener((msg, _sender, sendResponse) => {
     if (msg && msg.type === 'GET_STATE') {
