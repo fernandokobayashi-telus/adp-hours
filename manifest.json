@@ -19,6 +19,11 @@
       "matches": ["https://expert.cloud.brasil.adp.com/*"]
     }
   ],
+  "permissions": ["storage", "alarms"],
+  "background": {
+    "service_worker": "src/background.js",
+    "type": "module"
+  },
   "action": {
     "default_popup": "src/popup.html",
     "default_title": "ADP Hours"

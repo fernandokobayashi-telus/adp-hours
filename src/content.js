@@ -45,6 +45,10 @@ const CSS = `
     const state = calculator.computeState(rows, new Date());
     lastState = state;
 
+    chrome.runtime
+      .sendMessage({ type: 'TARGET_UPDATE', atMs: state.next ? state.next.at.getTime() : null })
+      .catch(() => {});
+
     if (rows.length === 0) {
       console.warn('[adp-hours] punch table found but no rows parsed');
     }
@@ -66,6 +70,7 @@ const CSS = `
   });
   observer.observe(document.body, { childList: true, subtree: true });
   knownTable = document.querySelector(TABLE_SELECTOR);
+
   update();
 
   setInterval(update, 60_000);
