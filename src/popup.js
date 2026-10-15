@@ -1,4 +1,4 @@
-import { renderBanner } from './lib/render.js';
+import { renderBanner, lunchReminder } from './lib/render.js';
 
 const HOST_PATTERN = /^https:\/\/expert\.cloud\.brasil\.adp\.com\/expert\/v5\//;
 
@@ -42,6 +42,14 @@ async function main() {
   root.textContent = '';
   root.className = '';
   root.appendChild(renderBanner(state, document));
+
+  const reminder = lunchReminder(state);
+  if (reminder) {
+    const el = document.createElement('div');
+    el.className = 'adp-hours-reminder';
+    el.textContent = reminder;
+    root.appendChild(el);
+  }
 }
 
 main();

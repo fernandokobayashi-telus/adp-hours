@@ -1,7 +1,7 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { JSDOM } from 'jsdom';
-import { renderBanner } from './render.js';
+import { renderBanner, lunchReminder } from './render.js';
 import { TARGET_MS } from './calculator.js';
 
 function newDoc() {
@@ -97,4 +97,23 @@ test('renderBanner is idempotent when given the same root element', () => {
   );
   assert.strictEqual(first, second);
   assert.equal(first.querySelector('.adp-hours-line1').textContent, 'Trabalhado hoje: 1h');
+});
+
+const REMINDER = 'Não esqueça de bater o ponto no almoço (1h). A saída já considera a pausa.';
+const stateWith = (punchCount) => ({ workedMs: 0, punchCount, isOverTarget: false, suggestions: {} });
+
+test('lunchReminder: 1 punch → reminder text', () => {
+  assert.equal(lunchReminder(stateWith(1)), REMINDER);
+});
+
+test('lunchReminder: 0 punches → null', () => {
+  assert.equal(lunchReminder(stateWith(0)), null);
+});
+
+test('lunchReminder: 2 punches (already on lunch) → null', () => {
+  assert.equal(lunchReminder(stateWith(2)), null);
+});
+
+test('lunchReminder: 3 punches (back from lunch) → null', () => {
+  assert.equal(lunchReminder(stateWith(3)), null);
 });

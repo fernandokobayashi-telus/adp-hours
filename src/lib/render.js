@@ -20,6 +20,11 @@ export function renderBanner(state, doc, existing) {
   return root;
 }
 
+export function lunchReminder(state) {
+  if (state.punchCount !== 1) return null;
+  return 'Não esqueça de bater o ponto no almoço (1h). A saída já considera a pausa.';
+}
+
 function line2Text(state) {
   if (state.punchCount === 0) return 'Sem batidas hoje';
   if (state.suggestions.returnAt) {
