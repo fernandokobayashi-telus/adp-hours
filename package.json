@@ -1,10 +1,11 @@
 {
   "name": "adp-hours",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "private": true,
   "type": "module",
   "scripts": {
-    "test": "node --test src/lib/*.test.js"
+    "test": "node --test src/lib/*.test.js",
+    "package": "zip -r adp-hours-v$npm_package_version.zip manifest.json icons src -x \"*.test.js\" -x \"*.DS_Store\""
   },
   "devDependencies": {
     "jsdom": "^24.0.0"
