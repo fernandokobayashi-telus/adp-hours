@@ -2,6 +2,8 @@
 
 > Ferramenta pessoal e não oficial. Não tem vínculo com a ADP nem com a empresa.
 
+**Versão atual:** 0.3.0
+
 ## O que é
 
 Extensão do Chrome que lê a tabela de batidas de ponto da página da ADP e responde duas perguntas sem você precisar fazer conta:
@@ -9,24 +11,36 @@ Extensão do Chrome que lê a tabela de batidas de ponto da página da ADP e res
 - Quanto já trabalhei hoje?
 - Que horas eu preciso bater o ponto para fechar 8h?
 
-A resposta aparece em três lugares: um banner acima da tabela de ponto, um popup ao clicar no ícone da extensão e um contador direto no ícone, na barra do Chrome.
+A resposta aparece em quatro lugares: um banner acima da tabela de ponto, um popup ao clicar no ícone da extensão, um contador direto no ícone na barra do Chrome e notificações quando chega a hora de bater o ponto.
 
 ## O que você precisa
 
 - Google Chrome
-- Acesso ao repositório privado: https://github.com/fernandokobayashi-telus/adp-hours
+- O arquivo `adp-hours-v0.3.0.zip`, anexado a esta página (ou acesso ao repositório privado: https://github.com/fernandokobayashi-telus/adp-hours)
 - Node.js apenas se for rodar os testes (a extensão em si não precisa)
 
 ## Instalação
 
+### Pelo arquivo zip (mais simples)
+
+1. Baixe o `adp-hours-v0.3.0.zip` anexado a esta página.
+2. Descompacte em uma pasta onde ele possa ficar, por exemplo `~/extensoes/adp-hours`. O Chrome lê a extensão direto dessa pasta, então não apague nem mova depois.
+3. Abra `chrome://extensions` e ative o **Modo do desenvolvedor** (canto superior direito).
+4. Clique em **Carregar sem compactação** e selecione a pasta que você descompactou (a que contém o `manifest.json`).
+5. Abra a página de ponto da ADP: `https://expert.cloud.brasil.adp.com/expert/v5/`.
+
+### Pelo repositório
+
 1. Clone o repositório.
-2. Abra `chrome://extensions` e ative o **Modo do desenvolvedor** (canto superior direito).
-3. Clique em **Carregar sem compactação** e selecione a pasta do projeto.
-4. Abra a página de ponto da ADP: `https://expert.cloud.brasil.adp.com/expert/v5/`.
+2. Siga os passos 3 a 5 acima, selecionando a pasta do projeto.
 
-A extensão só atua nesse endereço e fica inativa em qualquer outro site.
+A extensão só atua no endereço da ADP e fica inativa em qualquer outro site.
 
-Depois de atualizar o código, clique em **Recarregar** na extensão e dê um refresh na aba da ADP.
+### Atualizando para uma nova versão
+
+1. Baixe o zip novo e descompacte por cima da pasta atual, substituindo os arquivos (ou rode `git pull` se instalou pelo repositório).
+2. Em `chrome://extensions`, clique em **Recarregar** na extensão. Se aparecer um pedido de novas permissões, aceite.
+3. Dê um refresh na aba da ADP.
 
 ## Como usar
 
@@ -57,11 +71,28 @@ A contagem continua atualizando a cada minuto mesmo com a aba da ADP fechada, e 
 
 Ao clicar no ícone, o popup mostra as mesmas informações do banner. Quando você bateu apenas a entrada, ele também mostra um lembrete amarelo para não esquecer de bater o ponto do almoço.
 
+### Notificações
+
+O Chrome mostra uma notificação em dois momentos:
+
+| Quando | Notificação |
+|---|---|
+| O 1h de almoço acabou | **Hora de voltar do almoço** |
+| Chegou a hora da saída final (8h completas) | **8h completas** |
+
+Como funcionam:
+
+- Cada horário gera **uma única notificação**. Ela não se repete; o contador vermelho no ícone continua lembrando enquanto você estiver atrasado.
+- Ela pode aparecer até 1 minuto depois do horário.
+- Fica na tela até você fechar.
+- Se você abrir a página da ADP depois do horário e ainda não tiver batido o ponto, o aviso aparece na hora.
+- O Chrome precisa ter permissão para mostrar notificações no sistema. No macOS: Ajustes do Sistema → Notificações → Google Chrome. Sem isso, nada aparece.
+
 ## Regras de cálculo
 
 A meta é 8h trabalhadas por dia, com 1h de almoço (CLT). Só entram as batidas do dia de hoje.
 
-| Batidas hoje | Situação | Próxima batida (contagem do ícone) |
+| Batidas hoje | Situação | Próxima batida (contador do ícone e notificação) |
 |---|---|---|
 | 0 | Não começou | nenhuma |
 | 1 | Trabalhando (manhã) | saída final = entrada + 8h + 1h de almoço |
@@ -77,6 +108,7 @@ Se o turno aberto já passou da hora prevista, o contador do ícone fica vermelh
 
 - **Depende da página da ADP.** A extensão lê a tabela `data-testid="ctn_table-punchin"`. Se a ADP mudar esse HTML, a leitura para de funcionar sem aviso (aparece só um `console.warn`).
 - **Precisa abrir a página de ponto.** Só a página da ADP conhece suas batidas. Se você bater o ponto e não abrir a página, o contador do ícone continua com o último valor conhecido.
+- **Avisos fora de hora.** Se você bater o ponto pelo app da ADP no celular e não atualizar a aba do navegador, a extensão não sabe disso e pode avisar de um horário que você já cumpriu. Bater o ponto pela página da ADP evita isso.
 - **Jornada fora do padrão.** Almoço de 30 minutos ou pausas longas que não são almoço geram uma sugestão errada até a próxima batida corrigir.
 - **Fuso horário.** Usa o fuso do navegador.
 - **Sem opções.** Meta de 8h e almoço de 1h são fixos no código.
@@ -86,8 +118,9 @@ Se o turno aberto já passou da hora prevista, o contador do ícone fica vermelh
 - Nenhum dado sai do navegador. Não há servidor, telemetria nem requisições externas.
 - Permissões usadas:
   - acesso ao endereço da ADP (`host_permissions`), para ler a tabela;
-  - `storage`, para guardar o horário da próxima batida;
-  - `alarms`, para atualizar a contagem do ícone a cada minuto.
+  - `storage`, para guardar o horário da próxima batida e qual aviso já foi dado;
+  - `alarms`, para atualizar a contagem do ícone a cada minuto;
+  - `notifications`, para mostrar os avisos de fim de almoço e de 8h completas.
 
 ## Problemas comuns
 
@@ -98,18 +131,21 @@ Se o turno aberto já passou da hora prevista, o contador do ícone fica vermelh
 | Popup diz "Página ainda carregando" | Dê refresh na aba da ADP. |
 | `Extension context invalidated` no console | Você recarregou a extensão com a aba aberta. Dê refresh na aba. |
 | Ícone mostra horário de ontem ou fica vazio | Abra a página de ponto da ADP uma vez para atualizar. |
+| Notificação não aparece | Permita notificações para o Google Chrome nas configurações do sistema (no macOS: Ajustes do Sistema → Notificações) e confira se o modo Não Perturbe está desligado. |
+| Extensão sumiu depois de mover a pasta | O Chrome lê a extensão da pasta descompactada. Volte a pasta para o lugar ou carregue de novo pelo passo 4 da instalação. |
 
 ## Desenvolvimento
 
 ```bash
 npm install
 npm test
+npm run package   # gera adp-hours-v<versão>.zip
 ```
 
 Estrutura:
 
-- `src/lib/` — módulos puros e testados (leitura da tabela, cálculo, formatação, banner, contador do ícone)
+- `src/lib/` — módulos puros e testados (leitura da tabela, cálculo, formatação, banner, contador do ícone, regra das notificações)
 - `src/content.js` — observa a página da ADP, injeta o banner e avisa o service worker
-- `src/background.js` — service worker que guarda a próxima batida e atualiza o ícone
+- `src/background.js` — service worker que guarda a próxima batida, atualiza o ícone e dispara as notificações
 - `src/popup.html` e `src/popup.js` — popup da barra do Chrome
 - `docs/superpowers/` — especificação e plano da versão inicial
