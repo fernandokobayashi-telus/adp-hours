@@ -53,7 +53,11 @@ const CSS = `
 
     try {
       chrome.runtime
-        .sendMessage({ type: 'TARGET_UPDATE', atMs: state.next ? state.next.at.getTime() : null })
+        .sendMessage({
+          type: 'TARGET_UPDATE',
+          atMs: state.next ? state.next.at.getTime() : null,
+          kind: state.next ? state.next.kind : null,
+        })
         .catch(() => {});
     } catch {
       shutdown();

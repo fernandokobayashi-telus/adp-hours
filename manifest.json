@@ -19,7 +19,7 @@
       "matches": ["https://expert.cloud.brasil.adp.com/*"]
     }
   ],
-  "permissions": ["storage", "alarms"],
+  "permissions": ["storage", "alarms", "notifications"],
   "background": {
     "service_worker": "src/background.js",
     "type": "module"
