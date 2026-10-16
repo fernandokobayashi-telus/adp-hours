@@ -55,17 +55,37 @@ Aparece acima da tabela de batidas:
 
 ### Ícone na barra do Chrome
 
-O ícone mostra uma contagem regressiva até a próxima batida:
+O ícone mostra uma contagem regressiva até a **próxima batida que você precisa fazer**. O que conta como "próxima batida" muda ao longo do dia, e é isso que costuma confundir:
 
-| Exemplo | Significado |
-|---|---|
-| `2h15` (verde) | faltam 2h15 para a próxima batida |
-| `45m` (verde) | faltam 45 minutos |
-| `-7m` (vermelho) | a batida já está atrasada em 7 minutos |
-| `-2h` (vermelho) | atrasada em mais de 99 minutos |
-| vazio | nada a sugerir (sem batidas hoje ou dia encerrado) |
+![Estados do ícone ao longo do dia](screenshots/03-icone.png)
+
+| Situação | O que o número mostra | Exemplo |
+|---|---|---|
+| Antes do almoço (1 batida) | Tempo até a **saída final**, já contando 1h de almoço | `8h39` às 08:21, com entrada às 08:00 |
+| No almoço (2 batidas) | Tempo até a **hora de voltar** (1h depois da sua saída) | `42m` às 12:33, com saída às 12:15 |
+| À tarde (3 batidas) | Tempo até a **saída final** | `45m` às 16:15 |
+| Atrasado | Número negativo em vermelho: quanto passou da hora | `-7m` |
+| Dia encerrado ou sem batidas | Sem número | ícone limpo |
+
+Verde significa que ainda dá tempo. Vermelho significa que passou da hora.
+
+**Por que `8h39` logo depois de entrar?** O horário do almoço varia de dia para dia, então a extensão não tenta adivinhá-lo. Antes do almoço, o contador aponta direto para a saída final e assume 1h de almoço no meio do caminho: entrando às 08:00, a saída é às 17:00 (8h de trabalho mais 1h de almoço), e às 08:21 faltam 8h39. Quando você bate a saída para o almoço, o contador passa a mostrar o tempo até a volta. Quando você volta, ele recalcula a saída final.
 
 A contagem continua atualizando a cada minuto mesmo com a aba da ADP fechada, e sobrevive ao reinício do navegador. O valor de um dia anterior é descartado automaticamente.
+
+#### Por que o formato é assim
+
+O Chrome reserva espaço para cerca de 4 caracteres no selo do ícone. Todas as decisões de formato saem desse limite:
+
+![O ícone comporta cerca de 4 caracteres](screenshots/05-limite.png)
+
+- **Tempo restante em vez de horário.** `17:30` tem 5 caracteres e não cabe. Um contador como `2h15` cabe e ainda mostra quanto falta, sem abrir nada.
+- **Horas e minutos colados.** Com 1h ou mais o formato é `2h15`, sem espaço nem `:`, e os minutos sempre com 2 dígitos (`1h05`).
+- **Só minutos abaixo de 1 hora.** `45m`, em vez de `0h45`.
+- **Cor no lugar de palavra.** Não há espaço para escrever "atrasado". Verde quer dizer que ainda dá tempo, vermelho que passou da hora, e o `-` na frente reforça.
+- **Atraso até 99 minutos fica em minutos** (`-99m`). Passou disso, `-100m` teria 5 caracteres, então o contador troca para horas inteiras, arredondadas para baixo: `-1h` de 100 a 119 minutos, `-2h` a partir de 2h. Perde precisão, mas continua cabendo.
+- **Arredondamento para cima.** Com 20 segundos restantes aparece `1m`, para nunca mostrar `0m` antes da hora.
+- **O detalhe completo fica no popup e no banner**, que não têm esse limite: horários exatos, tempo trabalhado e o lembrete do almoço.
 
 ### Popup
 
