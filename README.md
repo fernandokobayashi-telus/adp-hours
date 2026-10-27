@@ -7,7 +7,7 @@ Personal Chrome extension that reads the ADP punch-in table and shows worked hou
 1. Open `chrome://extensions`.
 2. Enable **Developer mode** (top right).
 3. Click **Load unpacked** and select this directory.
-4. Navigate to https://expert.cloud.brasil.adp.com/expert/v5/ and open the timesheet page.
+4. Navigate to https://expert.hcm.adp.com/expert/v5/ and open the timesheet page.
 
 The banner appears above the punch table. Click the toolbar icon for the same info in a popup.
 

@@ -27,7 +27,7 @@ A resposta aparece em quatro lugares: um banner acima da tabela de ponto, um pop
 2. Descompacte em uma pasta onde ele possa ficar, por exemplo `~/extensoes/adp-hours`. O Chrome lê a extensão direto dessa pasta, então não apague nem mova depois.
 3. Abra `chrome://extensions` e ative o **Modo do desenvolvedor** (canto superior direito).
 4. Clique em **Carregar sem compactação** e selecione a pasta que você descompactou (a que contém o `manifest.json`).
-5. Abra a página de ponto da ADP: `https://expert.cloud.brasil.adp.com/expert/v5/`.
+5. Abra a página de ponto da ADP: `https://expert.hcm.adp.com/expert/v5/`.
 
 ### Pelo repositório
 

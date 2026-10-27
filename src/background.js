@@ -30,7 +30,7 @@ async function render() {
     if (content) {
       chrome.notifications.create(`adp-hours-${target.atMs}`, {
         type: 'basic',
-        iconUrl: 'icons/icon128.png',
+        iconUrl: chrome.runtime.getURL('icons/icon128.png'),
         title: content.title,
         message: content.message,
         requireInteraction: true,
