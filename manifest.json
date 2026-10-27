@@ -2,13 +2,13 @@
   "manifest_version": 3,
   "name": "ADP Hours",
   "description": "Calculate worked hours and predict punch-out time from the ADP timesheet page.",
-  "version": "0.3.0",
+  "version": "0.3.1",
   "host_permissions": [
-    "https://expert.cloud.brasil.adp.com/expert/v5/*"
+    "https://expert.hcm.adp.com/expert/v5/*"
   ],
   "content_scripts": [
     {
-      "matches": ["https://expert.cloud.brasil.adp.com/expert/v5/*"],
+      "matches": ["https://expert.hcm.adp.com/expert/v5/*"],
       "js": ["src/content.js"],
       "run_at": "document_idle"
     }
@@ -16,7 +16,7 @@
   "web_accessible_resources": [
     {
       "resources": ["src/lib/*.js"],
-      "matches": ["https://expert.cloud.brasil.adp.com/*"]
+      "matches": ["https://expert.hcm.adp.com/*"]
     }
   ],
   "permissions": ["storage", "alarms", "notifications"],

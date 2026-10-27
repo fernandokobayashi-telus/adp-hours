@@ -1,6 +1,6 @@
 import { renderBanner, lunchReminder } from './lib/render.js';
 
-const HOST_PATTERN = /^https:\/\/expert\.cloud\.brasil\.adp\.com\/expert\/v5\//;
+const HOST_PATTERN = /^https:\/\/expert\.hcm\.adp\.com\/expert\/v5\//;
 
 function reviveState(raw) {
   return {
