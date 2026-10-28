@@ -2,7 +2,14 @@
 
 > Ferramenta pessoal e não oficial. Não tem vínculo com a ADP nem com a empresa.
 
-**Versão atual:** 0.3.0
+**Versão atual:** 0.3.1
+
+## Novidades
+
+**0.3.1 (28/10/2026)**
+
+- Corrige a extensão que parou de funcionar depois que a ADP mudou o endereço para `expert.hcm.adp.com`. Se o popup sempre mostra "Abra a página de ponto da ADP", atualize para esta versão (veja "Atualizando para uma nova versão").
+- Corrige o aviso "Unable to download all specified images" nas notificações.
 
 ## O que é
 
@@ -16,14 +23,14 @@ A resposta aparece em quatro lugares: um banner acima da tabela de ponto, um pop
 ## O que você precisa
 
 - Google Chrome
-- O arquivo `adp-hours-v0.3.0.zip`, anexado a esta página (ou acesso ao repositório privado: https://github.com/fernandokobayashi-telus/adp-hours)
+- O arquivo `adp-hours-v0.3.1.zip`, anexado a esta página (ou acesso ao repositório privado: https://github.com/fernandokobayashi-telus/adp-hours)
 - Node.js apenas se for rodar os testes (a extensão em si não precisa)
 
 ## Instalação
 
 ### Pelo arquivo zip (mais simples)
 
-1. Baixe o `adp-hours-v0.3.0.zip` anexado a esta página.
+1. Baixe o `adp-hours-v0.3.1.zip` anexado a esta página.
 2. Descompacte em uma pasta onde ele possa ficar, por exemplo `~/extensoes/adp-hours`. O Chrome lê a extensão direto dessa pasta, então não apague nem mova depois.
 3. Abra `chrome://extensions` e ative o **Modo do desenvolvedor** (canto superior direito).
 4. Clique em **Carregar sem compactação** e selecione a pasta que você descompactou (a que contém o `manifest.json`).
