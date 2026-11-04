@@ -8,13 +8,13 @@
 
 **0.4.0 (04/11/2026)**
 
-- Corrige o cálculo quando a tabela da ADP mostra só as últimas 4 batidas: as batidas que saem da tabela agora são lembradas durante o dia.
+- Corrige o cálculo quando a tabela da ADP mostra só as últimas 4 batidas: as batidas que saem da tabela agora são lembradas durante o dia. Contribuição de Tiago ([tiagobrito-ops](https://github.com/tiagobrito-ops), [PR #3](https://github.com/fernandokobayashi-telus/adp-hours/pull/3)).
 - A extensão agora avisa quando existe uma versão nova: uma notificação e um link no popup, conferidos uma vez por dia (veja "Atualizando para uma nova versão").
 - O download passou a ser sempre o `adp-hours-latest.zip`, atualizado automaticamente a cada versão.
 
 **0.3.1 (28/10/2026)**
 
-- Corrige a extensão que parou de funcionar depois que a ADP mudou o endereço para `expert.hcm.adp.com`. Se o popup sempre mostra "Abra a página de ponto da ADP", atualize para esta versão (veja "Atualizando para uma nova versão").
+- Corrige a extensão que parou de funcionar depois que a ADP mudou o endereço para `expert.hcm.adp.com`. Se o popup sempre mostra "Abra a página de ponto da ADP", atualize para esta versão (veja "Atualizando para uma nova versão"). Contribuição de Tiago ([tiagobrito-ops](https://github.com/tiagobrito-ops), [PR #2](https://github.com/fernandokobayashi-telus/adp-hours/pull/2)).
 - Corrige o aviso "Unable to download all specified images" nas notificações.
 
 ## O que é
