@@ -8,6 +8,7 @@
 
 **0.4.0 (04/11/2026)**
 
+- Corrige o cálculo quando a tabela da ADP mostra só as últimas 4 batidas: as batidas que saem da tabela agora são lembradas durante o dia.
 - A extensão agora avisa quando existe uma versão nova: uma notificação e um link no popup, conferidos uma vez por dia (veja "Atualizando para uma nova versão").
 - O download passou a ser sempre o `adp-hours-latest.zip`, atualizado automaticamente a cada versão.
 
