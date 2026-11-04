@@ -57,3 +57,28 @@ test('parseRows handles multi-date table', () => {
   assert.equal(rows[0].dateStr, '24/05/2026');
   assert.equal(rows[1].dateStr, '25/05/2026');
 });
+
+test('mergeRows keeps remembered punches the 4-row table cut off', async () => {
+  const { mergeRows } = await import('./parser.js');
+  const { computeState } = await import('./calculator.js');
+  const at = (h, m) => new Date(2026, 9, 30, h, m);
+  const row = (h, m) => ({ time: at(h, m), dateStr: '30/10/2026' });
+  const table = [row(16, 24), row(15, 13), row(12, 44), row(11, 44)];
+  const remembered = [row(7, 2), row(11, 44), row(12, 44)];
+  const rows = mergeRows(table, remembered);
+  assert.equal(rows.length, 5);
+  const state = computeState(rows, at(16, 47));
+  assert.equal(state.punchCount, 5);
+  assert.equal(Math.round(state.workedMs / 60000), 7 * 60 + 11 + 23);
+  assert.equal(state.next.kind, 'out');
+});
+
+test('mergeRows preserves duplicate same-minute punches from primary source', async () => {
+  const { mergeRows } = await import('./parser.js');
+  const at = (h, m) => new Date(2026, 9, 30, h, m);
+  const row = (h, m) => ({ time: at(h, m), dateStr: '30/10/2026' });
+  const table = [row(12, 0), row(12, 0)];
+  const remembered = [row(12, 0)];
+  const rows = mergeRows(table, remembered);
+  assert.equal(rows.length, 2);
+});

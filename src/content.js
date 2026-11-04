@@ -36,7 +36,40 @@ const CSS = `
     document.head.appendChild(style);
   }
 
-  function update() {
+  // The punch table only lists the 4 latest punches and ADP no longer exposes
+  // the full day (time-card API returns 403). Remember every punch seen today
+  // and merge it back, so punches that scroll out of the table are kept.
+  const STORE_KEY = 'punches';
+  const pad = (n) => String(n).padStart(2, '0');
+  const dayStr = (d) => `${pad(d.getDate())}/${pad(d.getMonth() + 1)}/${d.getFullYear()}`;
+
+  try {
+    localStorage.removeItem('adp-hours:punches');
+  } catch {
+    // ignore if localStorage is blocked
+  }
+
+  async function loadRemembered(now) {
+    try {
+      const data = await chrome.storage.local.get(STORE_KEY);
+      const saved = data?.[STORE_KEY];
+      if (saved?.day !== dayStr(now) || !Array.isArray(saved?.times)) return [];
+      return saved.times.map((t) => ({ time: new Date(t), dateStr: saved.day }));
+    } catch {
+      return [];
+    }
+  }
+
+  async function remember(rows, now) {
+    const day = dayStr(now);
+    const times = rows.filter((r) => r.dateStr === day).map((r) => r.time.getTime());
+    try {
+      await chrome.storage.local.set({ [STORE_KEY]: { day, times } });
+    } catch {
+      // storage full or blocked: fall back to table-only data
+    }
+  }
+  async function update() {
     // After the extension is reloaded, this orphaned script keeps running but
     // every chrome.runtime call throws "Extension context invalidated".
     if (!chrome.runtime?.id) {
@@ -47,8 +80,12 @@ const CSS = `
     if (!table) return;
     injectStyleOnce();
 
-    const rows = parser.parseRows(table);
-    const state = calculator.computeState(rows, new Date());
+    const now = new Date();
+    const tableRows = parser.parseRows(table);
+    const remembered = await loadRemembered(now);
+    const rows = parser.mergeRows(tableRows, remembered);
+    await remember(rows, now);
+    const state = calculator.computeState(rows, now);
     lastState = state;
 
     try {
@@ -64,7 +101,7 @@ const CSS = `
       return;
     }
 
-    if (rows.length === 0) {
+    if (tableRows.length === 0) {
       console.warn('[adp-hours] punch table found but no rows parsed');
     }
 
@@ -103,8 +140,12 @@ const CSS = `
 
   chrome.runtime.onMessage.addListener((msg, _sender, sendResponse) => {
     if (msg && msg.type === 'GET_STATE') {
-      update();
-      sendResponse({ ok: true, state: serializeState(lastState) });
+      update()
+        .then(() => sendResponse({ ok: true, state: serializeState(lastState) }))
+        .catch((err) => {
+          console.error('[adp-hours] update failed', err);
+          sendResponse({ ok: false, state: serializeState(lastState) });
+        });
       return true;
     }
   });
