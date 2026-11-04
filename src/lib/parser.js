@@ -27,3 +27,20 @@ export function parseRows(tableEl) {
   }
   return out;
 }
+
+// Union of several row sources, deduplicated by minute. The "Últimas Batidas"
+// table only lists the 4 latest punches, so callers merge in punches
+// remembered from earlier renders.
+export function mergeRows(...sources) {
+  const seen = new Set();
+  const out = [];
+  for (const rows of sources) {
+    for (const row of rows) {
+      const key = Math.floor(row.time.getTime() / 60000);
+      if (seen.has(key)) continue;
+      seen.add(key);
+      out.push(row);
+    }
+  }
+  return out;
+}
