@@ -2,9 +2,14 @@
 
 > Ferramenta pessoal e não oficial. Não tem vínculo com a ADP nem com a empresa.
 
-**Versão atual:** 0.3.1
+**Versão atual:** 0.4.0
 
 ## Novidades
+
+**0.4.0 (04/11/2026)**
+
+- A extensão agora avisa quando existe uma versão nova: uma notificação e um link no popup, conferidos uma vez por dia (veja "Atualizando para uma nova versão").
+- O download passou a ser sempre o `adp-hours-latest.zip`, atualizado automaticamente a cada versão.
 
 **0.3.1 (28/10/2026)**
 
