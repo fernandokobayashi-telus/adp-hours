@@ -128,6 +128,7 @@ Se o turno aberto já passou da hora prevista, o contador do ícone fica vermelh
 
 - **Depende da página da ADP.** A extensão lê a tabela `data-testid="ctn_table-punchin"`. Se a ADP mudar esse HTML, a leitura para de funcionar sem aviso (aparece só um `console.warn`).
 - **Precisa abrir a página de ponto.** Só a página da ADP conhece suas batidas. Se você bater o ponto e não abrir a página, o contador do ícone continua com o último valor conhecido.
+- **A tabela da ADP mostra só as 4 últimas batidas.** Em dias com mais de 4 batidas, as mais antigas saem da tabela. A extensão guarda no navegador (`localStorage`) as batidas de hoje que já viu e junta com as da tabela, então o cálculo continua certo. Ela só conhece o que apareceu na tabela com a página aberta: se você já tinha mais de 4 batidas antes de instalar ou atualizar, as mais antigas não são recuperadas. Em dia movimentado, abra a página da ADP depois de cada batida. A lista guardada é descartada na virada do dia.
 - **Avisos fora de hora.** Se você bater o ponto pelo app da ADP no celular e não atualizar a aba do navegador, a extensão não sabe disso e pode avisar de um horário que você já cumpriu. Bater o ponto pela página da ADP evita isso.
 - **Jornada fora do padrão.** Almoço de 30 minutos ou pausas longas que não são almoço geram uma sugestão errada até a próxima batida corrigir.
 - **Fuso horário.** Usa o fuso do navegador.
@@ -136,6 +137,7 @@ Se o turno aberto já passou da hora prevista, o contador do ícone fica vermelh
 ## Privacidade e permissões
 
 - Nenhum dado sai do navegador. Não há servidor, telemetria nem requisições externas.
+- As batidas do dia ficam no `localStorage` da própria página da ADP (chave `adp-hours:punches`), só neste navegador, e são substituídas no dia seguinte.
 - Permissões usadas:
   - acesso ao endereço da ADP (`host_permissions`), para ler a tabela;
   - `storage`, para guardar o horário da próxima batida e qual aviso já foi dado;
