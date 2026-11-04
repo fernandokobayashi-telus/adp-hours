@@ -22,7 +22,7 @@ npm test
 
 ## Releases
 
-Every push to `main` that touches the extension runs `.github/workflows/release.yml`: tests, build, then publish a `v<version>` release (once per version) and refresh the rolling `latest` release (`adp-hours-latest.zip`, stable URL above). If the `CONFLUENCE_*` secrets are set, it also updates the zip attached to the Confluence page.
+Every push to `main` that touches the extension runs `.github/workflows/release.yml`: tests, build, then publish a `v<version>` release (once per version) and refresh the rolling `latest` release (`adp-hours-latest.zip`, stable URL above).
 
 To ship a new version, bump `version` in **both** `package.json` and `manifest.json`; the workflow fails if they differ.
 

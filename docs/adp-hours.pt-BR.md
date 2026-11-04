@@ -29,14 +29,14 @@ A resposta aparece em quatro lugares: um banner acima da tabela de ponto, um pop
 ## O que você precisa
 
 - Google Chrome
-- O arquivo `adp-hours-latest.zip`, anexado a esta página (ou o repositório: https://github.com/fernandokobayashi-telus/adp-hours)
+- O arquivo [adp-hours-latest.zip](https://github.com/fernandokobayashi-telus/adp-hours/releases/download/latest/adp-hours-latest.zip) (ou o repositório: https://github.com/fernandokobayashi-telus/adp-hours)
 - Node.js apenas se for rodar os testes (a extensão em si não precisa)
 
 ## Instalação
 
 ### Pelo arquivo zip (mais simples)
 
-1. Baixe o `adp-hours-latest.zip` anexado a esta página.
+1. Baixe o [adp-hours-latest.zip](https://github.com/fernandokobayashi-telus/adp-hours/releases/download/latest/adp-hours-latest.zip).
 2. Descompacte em uma pasta onde ele possa ficar, por exemplo `~/extensoes/adp-hours`. O Chrome lê a extensão direto dessa pasta, então não apague nem mova depois.
 3. Abra `chrome://extensions` e ative o **Modo do desenvolvedor** (canto superior direito).
 4. Clique em **Carregar sem compactação** e selecione a pasta que você descompactou (a que contém o `manifest.json`).
@@ -143,7 +143,7 @@ Se o turno aberto já passou da hora prevista, o contador do ícone fica vermelh
 
 - **Depende da página da ADP.** A extensão lê a tabela `data-testid="ctn_table-punchin"`. Se a ADP mudar esse HTML, a leitura para de funcionar sem aviso (aparece só um `console.warn`).
 - **Precisa abrir a página de ponto.** Só a página da ADP conhece suas batidas. Se você bater o ponto e não abrir a página, o contador do ícone continua com o último valor conhecido.
-- **A tabela da ADP mostra só as 4 últimas batidas.** Em dias com mais de 4 batidas, as mais antigas saem da tabela. A extensão guarda no navegador (`localStorage`) as batidas de hoje que já viu e junta com as da tabela, então o cálculo continua certo. Ela só conhece o que apareceu na tabela com a página aberta: se você já tinha mais de 4 batidas antes de instalar ou atualizar, as mais antigas não são recuperadas. Em dia movimentado, abra a página da ADP depois de cada batida. A lista guardada é descartada na virada do dia.
+- **A tabela da ADP mostra só as 4 últimas batidas.** Em dias com mais de 4 batidas, as mais antigas saem da tabela. A extensão guarda no navegador (`chrome.storage.local`) as batidas de hoje que já viu e junta com as da tabela, então o cálculo continua certo. Ela só conhece o que apareceu na tabela com a página aberta: se você já tinha mais de 4 batidas antes de instalar ou atualizar, as mais antigas não são recuperadas. Em dia movimentado, abra a página da ADP depois de cada batida. A lista guardada é descartada na virada do dia.
 - **Avisos fora de hora.** Se você bater o ponto pelo app da ADP no celular e não atualizar a aba do navegador, a extensão não sabe disso e pode avisar de um horário que você já cumpriu. Bater o ponto pela página da ADP evita isso.
 - **Jornada fora do padrão.** Almoço de 30 minutos ou pausas longas que não são almoço geram uma sugestão errada até a próxima batida corrigir.
 - **Fuso horário.** Usa o fuso do navegador.
@@ -179,16 +179,14 @@ npm test
 npm run package   # gera adp-hours-v<versão>.zip
 ```
 
+Estrutura:
+
+- `src/lib/` — módulos puros e testados (leitura da tabela, cálculo, formatação, banner, contador do ícone, regra das notificações, verificação de versão)
+- `src/content.js` — observa a página da ADP, injeta o banner e avisa o service worker
+- `src/background.js` — service worker que guarda a próxima batida, atualiza o ícone, dispara as notificações e confere uma vez por dia se há versão nova
+- `src/popup.html` e `src/popup.js` — popup da barra do Chrome
+- `docs/superpowers/` — especificação e plano da versão inicial
+
 ### Publicação
 
 Todo push na `main` roda o workflow `.github/workflows/release.yml`: executa os testes, gera o zip, publica a release `v<versão>` (uma vez por versão) e atualiza a release `latest` com o `adp-hours-latest.zip`. Para publicar uma versão nova, suba a versão no `package.json` e no `manifest.json` (os dois precisam bater).
-
-Se os secrets `CONFLUENCE_BASE_URL`, `CONFLUENCE_PAGE_ID`, `CONFLUENCE_USER` e `CONFLUENCE_API_TOKEN` estiverem configurados no repositório, o workflow também atualiza o anexo `adp-hours-latest.zip` desta página.
-
-Estrutura:
-
-- `src/lib/` — módulos puros e testados (leitura da tabela, cálculo, formatação, banner, contador do ícone, regra das notificações)
-- `src/content.js` — observa a página da ADP, injeta o banner e avisa o service worker
-- `src/background.js` — service worker que guarda a próxima batida, atualiza o ícone e dispara as notificações
-- `src/popup.html` e `src/popup.js` — popup da barra do Chrome
-- `docs/superpowers/` — especificação e plano da versão inicial
