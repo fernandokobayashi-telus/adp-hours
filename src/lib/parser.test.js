@@ -72,3 +72,13 @@ test('mergeRows keeps remembered punches the 4-row table cut off', async () => {
   assert.equal(Math.round(state.workedMs / 60000), 7 * 60 + 11 + 23);
   assert.equal(state.next.kind, 'out');
 });
+
+test('mergeRows preserves duplicate same-minute punches from primary source', async () => {
+  const { mergeRows } = await import('./parser.js');
+  const at = (h, m) => new Date(2026, 9, 30, h, m);
+  const row = (h, m) => ({ time: at(h, m), dateStr: '30/10/2026' });
+  const table = [row(12, 0), row(12, 0)];
+  const remembered = [row(12, 0)];
+  const rows = mergeRows(table, remembered);
+  assert.equal(rows.length, 2);
+});

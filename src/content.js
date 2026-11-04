@@ -39,30 +39,36 @@ const CSS = `
   // The punch table only lists the 4 latest punches and ADP no longer exposes
   // the full day (time-card API returns 403). Remember every punch seen today
   // and merge it back, so punches that scroll out of the table are kept.
-  const STORE_KEY = 'adp-hours:punches';
+  const STORE_KEY = 'punches';
   const pad = (n) => String(n).padStart(2, '0');
   const dayStr = (d) => `${pad(d.getDate())}/${pad(d.getMonth() + 1)}/${d.getFullYear()}`;
 
-  function loadRemembered(now) {
+  try {
+    localStorage.removeItem('adp-hours:punches');
+  } catch {
+    // ignore if localStorage is blocked
+  }
+
+  async function loadRemembered(now) {
     try {
-      const saved = JSON.parse(localStorage.getItem(STORE_KEY));
-      if (saved?.day !== dayStr(now)) return [];
+      const data = await chrome.storage.local.get(STORE_KEY);
+      const saved = data?.[STORE_KEY];
+      if (saved?.day !== dayStr(now) || !Array.isArray(saved?.times)) return [];
       return saved.times.map((t) => ({ time: new Date(t), dateStr: saved.day }));
     } catch {
       return [];
     }
   }
 
-  function remember(rows, now) {
+  async function remember(rows, now) {
     const day = dayStr(now);
     const times = rows.filter((r) => r.dateStr === day).map((r) => r.time.getTime());
     try {
-      localStorage.setItem(STORE_KEY, JSON.stringify({ day, times }));
+      await chrome.storage.local.set({ [STORE_KEY]: { day, times } });
     } catch {
       // storage full or blocked: fall back to table-only data
     }
   }
-
   async function update() {
     // After the extension is reloaded, this orphaned script keeps running but
     // every chrome.runtime call throws "Extension context invalidated".
@@ -76,8 +82,9 @@ const CSS = `
 
     const now = new Date();
     const tableRows = parser.parseRows(table);
-    const rows = parser.mergeRows(tableRows, loadRemembered(now));
-    remember(rows, now);
+    const remembered = await loadRemembered(now);
+    const rows = parser.mergeRows(tableRows, remembered);
+    await remember(rows, now);
     const state = calculator.computeState(rows, now);
     lastState = state;
 
@@ -133,7 +140,12 @@ const CSS = `
 
   chrome.runtime.onMessage.addListener((msg, _sender, sendResponse) => {
     if (msg && msg.type === 'GET_STATE') {
-      update().then(() => sendResponse({ ok: true, state: serializeState(lastState) }));
+      update()
+        .then(() => sendResponse({ ok: true, state: serializeState(lastState) }))
+        .catch((err) => {
+          console.error('[adp-hours] update failed', err);
+          sendResponse({ ok: false, state: serializeState(lastState) });
+        });
       return true;
     }
   });
