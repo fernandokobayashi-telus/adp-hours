@@ -1,4 +1,5 @@
 import { renderBanner, lunchReminder } from './lib/render.js';
+import { isNewerVersion, RELEASE_URL } from './lib/update.js';
 
 const HOST_PATTERN = /^https:\/\/expert\.hcm\.adp\.com\/expert\/v5\//;
 
@@ -20,7 +21,19 @@ function showMessage(text) {
   root.className = 'adp-hours-empty';
 }
 
+async function showUpdateNotice() {
+  const { latestVersion } = await chrome.storage.local.get('latestVersion');
+  const current = chrome.runtime.getManifest().version;
+  if (!isNewerVersion(latestVersion, current)) return;
+  const link = document.getElementById('update');
+  link.href = RELEASE_URL;
+  link.target = '_blank';
+  link.textContent = `Nova versão ${latestVersion} disponível`;
+  link.hidden = false;
+}
+
 async function main() {
+  showUpdateNotice();
   const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
   if (!tab || !tab.url || !HOST_PATTERN.test(tab.url)) {
     showMessage('Abra a página de ponto da ADP.');
