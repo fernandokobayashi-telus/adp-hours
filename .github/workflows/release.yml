@@ -1,0 +1,92 @@
+name: Release
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - manifest.json
+      - icons/**
+      - src/**
+      - package.json
+      - .github/workflows/release.yml
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: release
+  cancel-in-progress: false
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - run: npm ci
+      - run: npm test
+
+      - name: Check manifest and package versions match
+        id: version
+        run: |
+          pkg=$(node -p "require('./package.json').version")
+          man=$(node -p "require('./manifest.json').version")
+          if [ "$pkg" != "$man" ]; then
+            echo "::error::package.json ($pkg) and manifest.json ($man) versions differ"
+            exit 1
+          fi
+          echo "version=$pkg" >> "$GITHUB_OUTPUT"
+
+      - name: Build zips
+        run: |
+          npm run package
+          cp "adp-hours-v${{ steps.version.outputs.version }}.zip" adp-hours-latest.zip
+
+      - name: Publish versioned release (once per version)
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          v="${{ steps.version.outputs.version }}"
+          if gh release view "v$v" >/dev/null 2>&1; then
+            echo "v$v already released, skipping"
+          else
+            gh release create "v$v" "adp-hours-v$v.zip" \
+              --title "v$v" --generate-notes --target "$GITHUB_SHA"
+          fi
+
+      - name: Update rolling "latest" release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release delete latest --cleanup-tag --yes || true
+          gh release create latest adp-hours-latest.zip \
+            --title "Latest (v${{ steps.version.outputs.version }})" \
+            --notes "Rolling build of \`main\`, currently v${{ steps.version.outputs.version }} (${GITHUB_SHA::7})." \
+            --target "$GITHUB_SHA"
+
+      # Optional: runs only when the Confluence secrets are configured.
+      - name: Update Confluence attachment
+        env:
+          CONFLUENCE_BASE_URL: ${{ secrets.CONFLUENCE_BASE_URL }}
+          CONFLUENCE_PAGE_ID: ${{ secrets.CONFLUENCE_PAGE_ID }}
+          CONFLUENCE_USER: ${{ secrets.CONFLUENCE_USER }}
+          CONFLUENCE_API_TOKEN: ${{ secrets.CONFLUENCE_API_TOKEN }}
+        run: |
+          if [ -z "$CONFLUENCE_API_TOKEN" ]; then
+            echo "Confluence secrets not set, skipping"
+            exit 0
+          fi
+          # PUT creates the attachment, or adds a new version if the filename exists.
+          curl --fail-with-body -sS -X PUT \
+            -u "$CONFLUENCE_USER:$CONFLUENCE_API_TOKEN" \
+            -H "X-Atlassian-Token: nosniff" \
+            -F "file=@adp-hours-latest.zip" \
+            -F "minorEdit=true" \
+            "$CONFLUENCE_BASE_URL/wiki/rest/api/content/$CONFLUENCE_PAGE_ID/child/attachment" >/dev/null
+          echo "Uploaded adp-hours-latest.zip to Confluence page $CONFLUENCE_PAGE_ID"
