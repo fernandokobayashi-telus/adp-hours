@@ -23,14 +23,14 @@ A resposta aparece em quatro lugares: um banner acima da tabela de ponto, um pop
 ## O que você precisa
 
 - Google Chrome
-- O arquivo `adp-hours-v0.3.1.zip`, anexado a esta página (ou acesso ao repositório privado: https://github.com/fernandokobayashi-telus/adp-hours)
+- O arquivo `adp-hours-latest.zip`, anexado a esta página (ou o repositório: https://github.com/fernandokobayashi-telus/adp-hours)
 - Node.js apenas se for rodar os testes (a extensão em si não precisa)
 
 ## Instalação
 
 ### Pelo arquivo zip (mais simples)
 
-1. Baixe o `adp-hours-v0.3.1.zip` anexado a esta página.
+1. Baixe o `adp-hours-latest.zip` anexado a esta página.
 2. Descompacte em uma pasta onde ele possa ficar, por exemplo `~/extensoes/adp-hours`. O Chrome lê a extensão direto dessa pasta, então não apague nem mova depois.
 3. Abra `chrome://extensions` e ative o **Modo do desenvolvedor** (canto superior direito).
 4. Clique em **Carregar sem compactação** e selecione a pasta que você descompactou (a que contém o `manifest.json`).
@@ -44,6 +44,8 @@ A resposta aparece em quatro lugares: um banner acima da tabela de ponto, um pop
 A extensão só atua no endereço da ADP e fica inativa em qualquer outro site.
 
 ### Atualizando para uma nova versão
+
+A extensão confere uma vez por dia (na primeira vez que a página da ADP é aberta) se existe uma versão nova. Se existir, mostra uma notificação e uma linha no popup; clicar leva à página de download. Ela não se atualiza sozinha, então siga os passos abaixo.
 
 1. Baixe o zip novo e descompacte por cima da pasta atual, substituindo os arquivos (ou rode `git pull` se instalou pelo repositório).
 2. Em `chrome://extensions`, clique em **Recarregar** na extensão. Se aparecer um pedido de novas permissões, aceite.
@@ -143,8 +145,8 @@ Se o turno aberto já passou da hora prevista, o contador do ícone fica vermelh
 
 ## Privacidade e permissões
 
-- Nenhum dado sai do navegador. Não há servidor, telemetria nem requisições externas.
-- As batidas do dia ficam no `localStorage` da própria página da ADP (chave `adp-hours:punches`), só neste navegador, e são substituídas no dia seguinte.
+- Nenhum dado seu sai do navegador. Não há servidor nem telemetria. A única requisição externa é a verificação de versão, uma vez por dia: ela baixa o `manifest.json` público do repositório no GitHub e não envia nenhuma informação.
+- As batidas do dia ficam guardadas na própria extensão (`chrome.storage.local`), só neste navegador, e são substituídas no dia seguinte.
 - Permissões usadas:
   - acesso ao endereço da ADP (`host_permissions`), para ler a tabela;
   - `storage`, para guardar o horário da próxima batida e qual aviso já foi dado;
@@ -170,6 +172,12 @@ npm install
 npm test
 npm run package   # gera adp-hours-v<versão>.zip
 ```
+
+### Publicação
+
+Todo push na `main` roda o workflow `.github/workflows/release.yml`: executa os testes, gera o zip, publica a release `v<versão>` (uma vez por versão) e atualiza a release `latest` com o `adp-hours-latest.zip`. Para publicar uma versão nova, suba a versão no `package.json` e no `manifest.json` (os dois precisam bater).
+
+Se os secrets `CONFLUENCE_BASE_URL`, `CONFLUENCE_PAGE_ID`, `CONFLUENCE_USER` e `CONFLUENCE_API_TOKEN` estiverem configurados no repositório, o workflow também atualiza o anexo `adp-hours-latest.zip` desta página.
 
 Estrutura:
 
